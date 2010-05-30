@@ -3,7 +3,7 @@
 	include_once(TOOLKIT . '/class.entrymanager.php');
 	include_once(TOOLKIT . '/class.sectionmanager.php');
 	include_once(EXTENSIONS . '/asdc/lib/class.asdc.php');
-	include_once(EXTENSIONS . '/smtp_email_library/lib/class.email.php');
+	//include_once(EXTENSIONS . '/smtp_email_library/lib/class.email.php');
 			
 	Class EmailTemplate{
 		
@@ -41,6 +41,36 @@
 		
 		public function send($members, array $vars=array()){
 
+		    if(!is_array($members)) $members = array($members);
+
+		    foreach($members as $member_id){
+
+		        $member = self::$_Members->fetchMemberFromID($member_id);
+
+		        $emailto = $member->getData(extension_Members::memberEmailFieldID(), true)->value;
+		        $emailfrom = sprintf(
+		            '%s <%s>', 
+		            Symphony::Configuration()->get('sitename', 'general'), 
+		            'noreply@' . parse_url(URL, PHP_URL_HOST)
+		        );
+
+		        $emailsubject = $this->__replaceFieldsInString(
+		            $this->__replaceVarsInString($this->subject, $vars), $member
+		        );
+
+		        $emailmessage = $this->__replaceFieldsInString(
+		            $this->__replaceVarsInString($this->body, $vars), $member
+		        );
+
+		        mail($emailto, $emailsubject, $emailmessage, 'From: '.$emailfrom);
+
+		        //unset($email);
+		    }
+
+		}
+		
+		/*public function send($members, array $vars=array()){
+
 			if(!is_array($members)) $members = array($members);
 
 			foreach($members as $member_id){
@@ -73,7 +103,7 @@
 				unset($email);
 			}
 			
-		}
+		}*/
 		
 		private function __replaceVarsInString($string, array $vars){
 			foreach($vars as $key => $value){
