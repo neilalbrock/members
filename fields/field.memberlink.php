@@ -224,14 +224,21 @@
 		}
 
 		public function fetchMemberFromID($member_id){
-			$driver = Administration::instance()->ExtensionManager->create('members');
-			return $driver->initialiseMemberObject($member_id);					
+			if(class_exists('Frontend')){
+				$driver = Frontend::instance()->ExtensionManager->create('members');
+			}else{
+				$driver = Administration::instance()->ExtensionManager->create('members');
+			}
+			return $driver->initialiseMemberObject($member_id);                 
 		}
 
 		public function fetchMemberFromUsername($username){
-			$driver = Administration::instance()->ExtensionManager->create('members');
-			$member_id = $this->Database->fetchVar('entry_id', 0, "SELECT `entry_id` FROM `tbl_entries_data_".$driver->usernameAndPasswordField()."` WHERE `username` = '".$username."' LIMIT 1");
-			
+			if(class_exists('Frontend')){
+				$driver = Frontend::instance()->ExtensionManager->create('members');
+			}else{
+				$driver = Administration::instance()->ExtensionManager->create('members');
+			}
+			$member_id = $this->Database->fetchVar('entry_id', 0, "SELECT `entry_id` FROM `sym_entries_data_".$driver->usernameAndPasswordField()."` WHERE `username` = '".$username."' LIMIT 1");
 			return ($member_id ? $this->fetchMemberFromID($member_id) : NULL);
 		}		
 
